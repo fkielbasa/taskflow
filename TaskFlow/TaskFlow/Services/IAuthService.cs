@@ -7,5 +7,6 @@ namespace TaskFlow.Services
         string Register(User user);
         User Login();
         string CreateToken(User user);
+        List<User> GetUsers();
     }
 }

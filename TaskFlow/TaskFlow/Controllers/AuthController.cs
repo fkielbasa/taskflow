@@ -19,8 +19,13 @@ namespace TaskFlow.Controllers
         [HttpPost("register")]
         public ActionResult<User> Register(User request)
         {
-            string x = _authService.Register(request);
-            return Ok(x);
+            //string token = _authService.Register(request);
+            return Ok(_authService.Register(request));
+        }
+        [HttpGet]
+        public ActionResult<User> Get()
+        {
+            return Ok(_authService.GetUsers());
         }
 
     }

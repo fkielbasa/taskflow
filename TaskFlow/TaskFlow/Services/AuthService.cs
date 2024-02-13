@@ -1,4 +1,7 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -8,22 +11,28 @@ namespace TaskFlow.Services
 {
     public class AuthService: IAuthService
     {
-        private IConfiguration _configuration;
-        public AuthService(IConfiguration configuration) { 
+        private readonly IConfiguration _configuration;
+        private readonly IMongoCollection<User> _users;
+        public AuthService(IConfiguration configuration,IOptions<DatabaseSettings> settings) { 
             _configuration = configuration;
+            var mongoClient = new MongoClient(settings.Value.ConnectionString);
+            _users = mongoClient.GetDatabase(settings.Value.DatabaseName)
+                .GetCollection<User>(settings.Value.UsersCollectionName);
         }
-        public String Register(User user)
+        public string Register(User user)
         {
-            string passwordHash
-               = BCrypt.Net.BCrypt.HashPassword(user.Password);
-            user.Username = user.Username;
-            user.FirstName = user.FirstName;
-            user.LastName = user.LastName;
-            user.Email = user.Email;
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
             user.Password = passwordHash;
+            user.Id = ObjectId.GenerateNewId().ToString();
+            _users.InsertOne(user);
             return CreateToken(user);
         }
-        public String CreateToken(User user)
+        public List<User> GetUsers()
+        {
+            var users = _users.Find(_ => true).ToList();
+            return users;
+        }
+        public string CreateToken(User user)
         {
             List<Claim> claims = new List<Claim> {
                 new Claim(ClaimTypes.Name,user.Username)
