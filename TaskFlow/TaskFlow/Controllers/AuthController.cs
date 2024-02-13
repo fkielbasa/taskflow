@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Models;
+using TaskFlow.Models.Dto;
 using TaskFlow.Services;
 
 namespace TaskFlow.Controllers
@@ -17,7 +18,7 @@ namespace TaskFlow.Controllers
         }
 
         [HttpPost("register")]
-        public ActionResult<User> Register(User request)
+        public ActionResult<string> Register(UserDtoRequest request)
         {
             //string token = _authService.Register(request);
             return Ok(_authService.Register(request));

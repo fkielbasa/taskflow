@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using TaskFlow.Models;
+using TaskFlow.Models.Dto;
 
 namespace TaskFlow.Services
 {
@@ -19,18 +20,34 @@ namespace TaskFlow.Services
             _users = mongoClient.GetDatabase(settings.Value.DatabaseName)
                 .GetCollection<User>(settings.Value.UsersCollectionName);
         }
-        public string Register(User user)
+        public string Register(UserDtoRequest userDto)
         {
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
-            user.Password = passwordHash;
-            user.Id = ObjectId.GenerateNewId().ToString();
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+            var user = new User
+            {
+                Id = ObjectId.GenerateNewId().ToString(),
+                Username = userDto.Username,
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName,
+                Email = userDto.Email,
+                Password = passwordHash
+            };
             _users.InsertOne(user);
             return CreateToken(user);
         }
-        public List<User> GetUsers()
+        public List<UserDtoResponse> GetUsers()
         {
             var users = _users.Find(_ => true).ToList();
-            return users;
+            var usersDto = users.Select(user =>
+                new UserDtoResponse
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email
+                }).ToList();
+            return usersDto;
         }
         public string CreateToken(User user)
         {
@@ -45,7 +62,6 @@ namespace TaskFlow.Services
 
             var token = new JwtSecurityToken(
                     claims: claims,
-                  
                     expires: DateTime.Now.AddDays(1),
                     signingCredentials: creds
                 );
