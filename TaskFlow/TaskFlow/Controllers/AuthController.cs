@@ -1,0 +1,27 @@
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Models;
+using TaskFlow.Services;
+
+namespace TaskFlow.Controllers
+{
+    [Route("api/v1/[controller]")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        //public static User user = new User();
+        private readonly IAuthService _authService;
+        public AuthController(IAuthService authService)
+        {
+            _authService = authService;
+        }
+
+        [HttpPost("register")]
+        public ActionResult<User> Register(User request)
+        {
+            string x = _authService.Register(request);
+            return Ok(x);
+        }
+
+    }
+}
