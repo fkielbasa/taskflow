@@ -71,12 +71,21 @@ namespace TaskFlow.Services
             return jwt;
         }
 
-
-        public User Login()
+        public string Login(UserDtoRequest userDto)
         {
-            throw new NotImplementedException();
+            var user = _users.Find(u => u.Email == userDto.Email).SingleOrDefault();
+            if (user == null)
+            {
+                return null;
+            }
+
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(userDto.Password, user.Password);
+            if (!isPasswordValid)
+            {
+                return null;
+            }
+            return CreateToken(user);
         }
 
-      
     }
 }

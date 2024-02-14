@@ -29,5 +29,16 @@ namespace TaskFlow.Controllers
             return Ok(_authService.GetUsers());
         }
 
+        [HttpPost("login")]
+        public ActionResult<string> Login(UserDtoRequest user)
+        {
+            if(_authService.Login(user) != null) 
+            {
+                return Ok(_authService.Login(user));
+            }
+            return BadRequest("Invalid email or password");
+            
+        }
+
     }
 }
