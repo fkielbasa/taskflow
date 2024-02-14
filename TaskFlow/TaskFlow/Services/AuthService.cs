@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using TaskFlow.Models;
 using TaskFlow.Models.Dto;
+using TaskFlow.Utils;
 
 namespace TaskFlow.Services
 {
@@ -23,6 +24,10 @@ namespace TaskFlow.Services
         public string Register(UserDtoRequest userDto)
         {
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
+            if (!UserUtils.IsEmailAvailable(userDto.Email, _users))
+            {
+                return null;
+            }
             var user = new User
             {
                 Id = ObjectId.GenerateNewId().ToString(),
@@ -71,15 +76,15 @@ namespace TaskFlow.Services
             return jwt;
         }
 
-        public string Login(UserDtoRequest userDto)
+        public string Login(LoginDto u)
         {
-            var user = _users.Find(u => u.Email == userDto.Email).SingleOrDefault();
+            var user = _users.Find(u => u.Email == u.Email).SingleOrDefault();
             if (user == null)
             {
                 return null;
             }
 
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(userDto.Password, user.Password);
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(u.Password, user.Password);
             if (!isPasswordValid)
             {
                 return null;

@@ -23,21 +23,22 @@ namespace TaskFlow.Controllers
             //string token = _authService.Register(request);
             return Ok(_authService.Register(request));
         }
-        [HttpGet]
+
+        [HttpGet("users")]
         public ActionResult<User> Get()
         {
             return Ok(_authService.GetUsers());
         }
 
         [HttpPost("login")]
-        public ActionResult<string> Login(UserDtoRequest user)
+        public ActionResult<string> Login(LoginDto user)
         {
-            if(_authService.Login(user) != null) 
+            var loginResult = _authService.Login(user);
+            if (loginResult != null)
             {
-                return Ok(_authService.Login(user));
+                return Ok(loginResult);
             }
-            return BadRequest("Invalid email or password");
-            
+            return BadRequest(new { message = "Invalid email or password" });
         }
 
     }
