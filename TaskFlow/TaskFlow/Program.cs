@@ -8,7 +8,16 @@ using TaskFlow.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:5173", "https://localhost:7084")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 //var databaseSettings = configuration.GetSection("DatabaseSettings").Get<DatabaseSettings>();
 
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
@@ -72,7 +81,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowSpecificOrigin");
 app.UseRouting();
 
 // Enable authentication

@@ -76,15 +76,15 @@ namespace TaskFlow.Services
             return jwt;
         }
 
-        public string Login(LoginDto u)
+        public string Login(LoginDto usr)
         {
-            var user = _users.Find(u => u.Email == u.Email).SingleOrDefault();
+            var user = _users.Find(u => u.Email == usr.Email).SingleOrDefault();
             if (user == null)
             {
                 return null;
             }
 
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(u.Password, user.Password);
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(usr.Password, user.Password);
             if (!isPasswordValid)
             {
                 return null;
