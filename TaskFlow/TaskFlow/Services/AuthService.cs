@@ -56,22 +56,25 @@ namespace TaskFlow.Services
         }
         public string CreateToken(User user)
         {
-            List<Claim> claims = new List<Claim> {
-                new Claim(ClaimTypes.Name,user.Username)
-            };
-
+            var tokenHandler = new JwtSecurityTokenHandler();
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration.GetSection("AppSettings:Token").Value!));
-
+                 _configuration.GetSection("AppSettings:Token").Value!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                    claims: claims,
-                    expires: DateTime.Now.AddDays(1),
-                    signingCredentials: creds
-                );
+            var payload = new JwtPayload
+            { 
+                { "username", user.Username },
+                {"firstName", user.FirstName },
+                {"lastName", user.LastName },
+                { "email", user.Email } 
+            };
 
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            var token = new JwtSecurityToken(
+                new JwtHeader(creds),
+                payload
+            );
+
+            var jwt = tokenHandler.WriteToken(token);
 
             return jwt;
         }
