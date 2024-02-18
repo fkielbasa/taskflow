@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -64,8 +65,8 @@ namespace TaskFlow.Services
             var payload = new JwtPayload
             { 
                 { "username", user.Username },
-                {"firstName", user.FirstName },
-                {"lastName", user.LastName },
+                { "firstName", user.FirstName },
+                { "lastName", user.LastName },
                 { "email", user.Email } 
             };
 
@@ -94,6 +95,10 @@ namespace TaskFlow.Services
             }
             return CreateToken(user);
         }
-
+        public User GetUserByEmail(string email)
+        {
+            var user = _users.Find(u => u.Email == email).FirstOrDefault();
+            return user;
+        }
     }
 }

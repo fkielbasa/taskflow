@@ -9,5 +9,6 @@ namespace TaskFlow.Services
         string Login(LoginDto user);
         string CreateToken(User user);
         List<UserDtoResponse> GetUsers();
+        User GetUserByEmail(string email);
     }
 }

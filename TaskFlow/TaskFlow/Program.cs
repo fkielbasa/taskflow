@@ -5,9 +5,11 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using TaskFlow.Models;
 using TaskFlow.Services;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+DotNetEnv.Env.Load();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -23,9 +25,9 @@ builder.Services.AddCors(options =>
 //var databaseSettings = configuration.GetSection("DatabaseSettings").Get<DatabaseSettings>();
 
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
-builder.Services.AddSingleton<AuthService>();
-
+builder.Services.AddTransient<IMailService, MailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddControllers();
 
 var tokenKey = configuration.GetSection("AppSettings:Token").Value;
