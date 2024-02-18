@@ -12,9 +12,11 @@ namespace TaskFlow.Controllers
     {
         //public static User user = new User();
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly IMailService _mailService;
+        public AuthController(IAuthService authService, IMailService mailService)
         {
             _authService = authService;
+           _mailService = mailService;
         }
 
         [HttpPost("register")]
@@ -39,6 +41,19 @@ namespace TaskFlow.Controllers
                 return Ok(loginResult);
             }
             return BadRequest(new { message = "Invalid email or password" });
+        }
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPasswordAsync(string email)
+        {
+            var user = _authService.GetUserByEmail(email);
+            if (user == null)
+            {
+                return NotFound("Użytkownik o podanym adresie e-mail nie istnieje.");
+            }
+
+            _mailService.SendResetPasswordEmail(email);
+
+            return Ok("Wiadomość z linkiem do resetowania hasła została wysłana na podany adres e-mail.");
         }
 
     }
