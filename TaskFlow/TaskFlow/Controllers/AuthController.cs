@@ -22,8 +22,11 @@ namespace TaskFlow.Controllers
         [HttpPost("register")]
         public ActionResult<string> Register(UserDtoRequest request)
         {
-            //string token = _authService.Register(request);
-            return Ok(_authService.Register(request));
+            if(_authService.Register(request) != null)
+            {
+                return Ok();
+            }
+            return BadRequest(new { message = "Invalid data" }); 
         }
 
         [HttpGet("users")]
@@ -33,7 +36,7 @@ namespace TaskFlow.Controllers
         }
 
         [HttpPost("login")]
-        public ActionResult<string> Login(LoginDto user)
+        public ActionResult<LoginDtoResponse> Login(LoginDto user)
         {
             var loginResult = _authService.Login(user);
             if (loginResult != null)

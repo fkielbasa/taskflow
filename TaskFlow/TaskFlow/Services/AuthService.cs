@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -22,7 +23,7 @@ namespace TaskFlow.Services
             _users = mongoClient.GetDatabase(settings.Value.DatabaseName)
                 .GetCollection<User>(settings.Value.UsersCollectionName);
         }
-        public string Register(UserDtoRequest userDto)
+        public User Register(UserDtoRequest userDto)
         {
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
             if (!UserUtils.IsEmailAvailable(userDto.Email, _users))
@@ -39,7 +40,7 @@ namespace TaskFlow.Services
                 Password = passwordHash
             };
             _users.InsertOne(user);
-            return CreateToken(user);
+            return user;
         }
         public List<UserDtoResponse> GetUsers()
         {
@@ -80,7 +81,7 @@ namespace TaskFlow.Services
             return jwt;
         }
 
-        public string Login(LoginDto usr)
+        public LoginDtoResponse Login(LoginDto usr)
         {
             var user = _users.Find(u => u.Email == usr.Email).SingleOrDefault();
             if (user == null)
@@ -93,7 +94,14 @@ namespace TaskFlow.Services
             {
                 return null;
             }
-            return CreateToken(user);
+            string token = CreateToken(user);
+
+            DateTime expiration = DateTime.UtcNow.AddHours(1);
+            return new LoginDtoResponse
+            {
+                Token = token,
+                Expiration = expiration
+            };
         }
         public User GetUserByEmail(string email)
         {

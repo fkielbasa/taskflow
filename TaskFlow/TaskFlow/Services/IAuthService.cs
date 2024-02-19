@@ -5,8 +5,8 @@ namespace TaskFlow.Services
 {
     public interface IAuthService
     {
-        string Register(UserDtoRequest user);
-        string Login(LoginDto user);
+        User Register(UserDtoRequest user);
+        LoginDtoResponse Login(LoginDto user);
         string CreateToken(User user);
         List<UserDtoResponse> GetUsers();
         User GetUserByEmail(string email);
