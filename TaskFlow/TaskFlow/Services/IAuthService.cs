@@ -10,5 +10,6 @@ namespace TaskFlow.Services
         string CreateToken(User user);
         List<UserDtoResponse> GetUsers();
         User GetUserByEmail(string email);
+        PasswordResetToken IsResetTokenValid(string resetToken);
     }
 }

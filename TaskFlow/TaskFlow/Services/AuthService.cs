@@ -17,11 +17,14 @@ namespace TaskFlow.Services
     {
         private readonly IConfiguration _configuration;
         private readonly IMongoCollection<User> _users;
+        private readonly IMongoCollection<PasswordResetToken> _tokenCollection;
         public AuthService(IConfiguration configuration,IOptions<DatabaseSettings> settings) { 
             _configuration = configuration;
             var mongoClient = new MongoClient(settings.Value.ConnectionString);
             _users = mongoClient.GetDatabase(settings.Value.DatabaseName)
                 .GetCollection<User>(settings.Value.UsersCollectionName);
+            _tokenCollection = mongoClient.GetDatabase(settings.Value.DatabaseName)
+                .GetCollection<PasswordResetToken>(settings.Value.ResetTokensCollectionName);
         }
         public User Register(UserDtoRequest userDto)
         {
@@ -96,7 +99,7 @@ namespace TaskFlow.Services
             }
             string token = CreateToken(user);
 
-            DateTime expiration = DateTime.UtcNow.AddHours(1);
+            DateTime expiration = DateTime.Now.AddDays(1);
             return new LoginDtoResponse
             {
                 Token = token,
@@ -107,6 +110,19 @@ namespace TaskFlow.Services
         {
             var user = _users.Find(u => u.Email == email).FirstOrDefault();
             return user;
+        }
+        public PasswordResetToken IsResetTokenValid(string resetToken)
+        {
+            var user = _tokenCollection.Find(t => t.Token == resetToken).FirstOrDefault();
+            if (user == null)
+            {
+                return null; 
+            }
+            if (user.ExpiryDate < DateTime.Now)
+            {
+                return null; 
+            }
+            return user; 
         }
     }
 }

@@ -16,10 +16,12 @@ namespace TaskFlow.Services
     {
         private readonly IMongoCollection<PasswordResetToken> _tokenCollection;
         private readonly IConfiguration _configuration;
+        private readonly IAuthService _authService;
 
-        public MailService(IConfiguration configuration, IOptions<DatabaseSettings> settings)
+        public MailService(IConfiguration configuration, IOptions<DatabaseSettings> settings,IAuthService authService)
         {
             _configuration = configuration;
+            _authService = authService;
             var mongoClient = new MongoClient(settings.Value.ConnectionString);
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
             _tokenCollection = database.GetCollection<PasswordResetToken>(settings.Value.ResetTokensCollectionName);
@@ -28,10 +30,11 @@ namespace TaskFlow.Services
         public Task SendResetPasswordEmail(string userEmail)
         {
             string resetToken = Guid.NewGuid().ToString();
+            string userId = _authService.GetUserByEmail(userEmail).Id;
 
             _tokenCollection.InsertOneAsync(new PasswordResetToken
             {
-                UserId = userEmail,
+                UserId = userId,
                 Token = resetToken,
                 ExpiryDate = DateTime.Now.AddMinutes(5)
             });
@@ -41,9 +44,9 @@ namespace TaskFlow.Services
             string smtpSender = _configuration.GetSection("EmailSettings:Sender").Value;
             string smtpPassword = _configuration.GetSection("EmailSettings:Password").Value;
 
-            string resetLink = $"http://localhost:5173/login?token={resetToken}";
+            string resetLink = $"http://localhost:5173/reset-password/{resetToken}";
             string subject = "Password reset";
-            string body = $"Aby zresetować hasło, proszę kliknąć <a href=\"{resetLink}\">tutaj</a>.";
+            string body = $"To reset your password, please click on the link: <a href=\"{resetLink}\">link</a>";
 
             var email = new MimeMessage();
             email.From.Add(MailboxAddress.Parse(smtpSender));

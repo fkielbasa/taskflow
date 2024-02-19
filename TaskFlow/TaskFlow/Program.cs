@@ -26,7 +26,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("DatabaseSettings"));
 builder.Services.AddTransient<IMailService, MailService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddTransient<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
 
@@ -60,6 +60,7 @@ builder.Services.AddSwaggerGen(option =>
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
+
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {

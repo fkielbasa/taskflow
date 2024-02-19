@@ -51,12 +51,22 @@ namespace TaskFlow.Controllers
             var user = _authService.GetUserByEmail(email);
             if (user == null)
             {
-                return NotFound("Użytkownik o podanym adresie e-mail nie istnieje.");
+                return NotFound("User with this email doesn't exist.");
             }
 
             _mailService.SendResetPasswordEmail(email);
 
-            return Ok("Wiadomość z linkiem do resetowania hasła została wysłana na podany adres e-mail.");
+            return Ok("Email with a password reset link has been sent to your email address.");
+        }
+        [HttpPost("check-reset-token")]
+        public async Task<IActionResult> CheckResetToken(string token)
+        {
+            var user = _authService.IsResetTokenValid(token);
+            if (user != null)
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
 
     }
