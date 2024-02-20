@@ -68,6 +68,16 @@ namespace TaskFlow.Controllers
             }
             return BadRequest();
         }
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(string resetToken, string newPassword)
+        {
+            var user = _authService.ChangePassword(newPassword, resetToken);
+            if (user != null)
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
 
     }
 }

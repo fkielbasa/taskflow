@@ -124,5 +124,20 @@ namespace TaskFlow.Services
             }
             return user; 
         }
+        public PasswordResetToken ChangePassword(string newPassword, string resetToken)
+        {
+            var user = IsResetTokenValid(resetToken);
+            if (user != null)
+            {
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                var filter = Builders<User>.Filter.Eq(u => u.Id, user.UserId);
+                var update = Builders<User>.Update.Set(u => u.Password, passwordHash);
+
+                _users.UpdateOne(filter, update);
+                return user;
+            }
+            return null;
+
+        }
     }
 }
