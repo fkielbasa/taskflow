@@ -137,7 +137,17 @@ namespace TaskFlow.Services
                 return user;
             }
             return null;
-
+        }
+        public PasswordResetToken RemoveResetToken(string id)
+        {
+            var token = _tokenCollection.Find(t => t.Id == id).FirstOrDefault();
+            if(token != null)
+            {
+                var filter = Builders<PasswordResetToken>.Filter.Eq("Id", id);
+                _tokenCollection.DeleteOne(filter);
+                return token;
+            }
+            return null;
         }
     }
 }
