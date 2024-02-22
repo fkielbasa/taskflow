@@ -36,8 +36,8 @@ namespace TaskFlow.Services
             {
                 UserId = userId,
                 Token = resetToken,
-                ExpiryDate = DateTime.Now.AddMinutes(5)
-            });
+                ExpiryDate = DateTime.UtcNow.AddHours(1).AddMinutes(15)
+        });
 
             string smtpHost = _configuration.GetSection("EmailSettings:Host").Value;
             int smtpPort = Convert.ToInt32(_configuration.GetSection("EmailSettings:Port").Value);
